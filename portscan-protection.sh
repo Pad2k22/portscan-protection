@@ -4,6 +4,7 @@ VERSION="05-04-2021"
 SCRIPTLOCATION="/usr/local/sbin/portscan-protection.sh"
 WHITELISTLOCATION="/usr/local/sbin/portscan-protection-white.list"
 CRONLOCATION="/etc/cron.d/portscan-protection"
+GITHUBRAW=""
 AUTOUPDATE="NO" # Edit this variable to "NO" if you don't want to auto update this script (NOT RECOMMENDED)
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
@@ -33,7 +34,7 @@ SETCRONTAB()
 
 WHITELIST()
 {
-	[ ! -f "$WHITELISTLOCATION" ] && echo -e "# This file is part of $SCRIPTNAME\n# Add one IP per line to this file. These IP addresses will be never blocked. Note: Only IPv4 addresses are supported.\n# More info on GitHub: https://github.com/Feriman22/portscan-protection\n# If you found it useful, please donate via PayPal: https://paypal.me/BajzaFerenc\n# Thank you!\n\n127.0.0.1" > $WHITELISTLOCATION
+	[ ! -f "$WHITELISTLOCATION" ] && echo -e "# This file is part of $SCRIPTNAME\n# Add one IP per line to this file. These IP addresses will be never blocked. Note: Only IPv4 addresses are supported.\n# \n127.0.0.1" > $WHITELISTLOCATION
 	for i in nano vi vim; do
 		if which $i > /dev/null; then
 			$i "$WHITELISTLOCATION"
@@ -54,19 +55,14 @@ if [ "$1" != '--cron' ]; then
 	NC='\033[0m' # No Color
 
 	echo -e "\n$SCRIPTNAME\n"
-	echo "Author: Feriman"
-	echo "URL: https://github.com/Feriman22/portscan-protection"
-	echo "Open GitHub page to read the manual and check new releases"
 	echo "Current version: $VERSION"
-	UPDATE ONLYCHECK # Check new version
-	echo -e "${GR}If you found it useful${NC}, please donate via PayPal: https://paypal.me/BajzaFerenc\n"
 fi
 
 # Check the root permission
 [ ! $(id -u) = 0 ] && echo -e "${RED}Run as root!${NC}\n" && exit 5
 
 # Check curl, ipset, iptables commands
-for i in curl ipset iptables; do ! which ipset > /dev/null && echo "$i command ${RED}not found${NC}" && NOT_FOUND=1; done
+for i in ipset iptables; do ! which ipset > /dev/null && echo "$i command ${RED}not found${NC}" && NOT_FOUND=1; done
 [ "$NOT_FOUND" == "1" ] && exit 10
 
 # Define ipset and iptable rules - Used at magic and uninstall part
@@ -112,7 +108,7 @@ if [ "$1" == "-i" ] || [ "$1" == "-u" ] || [ "$1" == "-v" ] || [ "$1" == "--inst
 	OPT="$1" && OPTL="$1" && ARG="YES"
 else
 	PS3='Please enter your choice: '
-	[ -f "$SCRIPTLOCATION" ] && options=("Verify" "Edit Whitelist" "Update from GitHub" "Uninstall" "Quit")
+	[ -f "$SCRIPTLOCATION" ] && options=("Verify" "Edit Whitelist" "Uninstall" "Quit")
 	[ ! -f "$SCRIPTLOCATION" ] && options=("Install" "Verify" "Quit")
 	select opt in "${options[@]}"
 	do
